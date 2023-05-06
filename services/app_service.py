@@ -33,7 +33,6 @@ def create_app(developer_id, app_name):
 def delete_app(app_id):
     app = get_app_by_id(app_id)
     db_session.delete(app)
-    return
 
 
 def update_app_status(app_id, app_status):

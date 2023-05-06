@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from config import UPLOAD_FOLDER
 from services import app_service
@@ -18,3 +19,8 @@ def _create_app_folder(app_id):
     app_upload_path = os.path.join(UPLOAD_FOLDER, str(app_id))
     os.makedirs(app_upload_path, exist_ok=True)
     return app_upload_path
+
+
+def delete_app_files(app_id):
+    app_upload_path = os.path.join(UPLOAD_FOLDER, str(app_id))
+    shutil.rmtree(app_upload_path, ignore_errors=True)

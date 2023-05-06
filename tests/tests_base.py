@@ -31,6 +31,9 @@ class BaseTestCase(unittest.TestCase):
         self.inner_session.close()
         global_db_session.registry.set(self._original_db_session)
 
+        shutil.rmtree(UPLOAD_FOLDER)
+        os.mkdir(UPLOAD_FOLDER)
+
     def use_test_db_session(self):
         global_db_session.registry.set(self.inner_session)
 

@@ -5,11 +5,11 @@ from models.app import Application, AppStatus
 from tests.tests_base import BaseTestCase
 
 
-class TestApps(BaseTestCase):
+class TestAppsService(BaseTestCase):
     pass
 
 
-class TestGetAppById(TestApps):
+class TestGetAppById(TestAppsService):
     def test_get_app_by_id_sanity(self):
         app = Application.get_dummy_object()
         app.save()
@@ -31,7 +31,7 @@ class TestGetAppById(TestApps):
         self.assertEqual(app_response, expected_app)
 
 
-class TestGetApps(TestApps):
+class TestGetApps(TestAppsService):
     def test_get_apps_sanity(self):
         Application.get_dummy_object(developer_id=123).save()
         Application.get_dummy_object(developer_id=456).save()
@@ -96,7 +96,7 @@ class TestGetApps(TestApps):
         self.assertEqual(len(apps_response), 0)
 
 
-class TestCreateApps(TestApps):
+class TestCreateApps(TestAppsService):
     def test_create_app_sanity(self):
         app = app_service.create_app(developer_id=123, app_name='abc')
         result = db_session.query(Application).first()
@@ -109,7 +109,7 @@ class TestCreateApps(TestApps):
             app_service.create_app(developer_id=123, app_name='abc')
 
 
-class TestDeleteApps(TestApps):
+class TestDeleteApps(TestAppsService):
     def test_delete_app_sanity(self):
         app = Application.get_dummy_object().save()
         self.assertEqual(len(db_session.query(Application).all()), 1)

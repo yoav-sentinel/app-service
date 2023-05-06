@@ -6,9 +6,9 @@ from werkzeug.utils import secure_filename
 from api.decorators import api_endpoint
 from api.exceptions import ValidationError
 from api.schemas.app_schema import AppIdPathSchema, PostAppSchema, AppResponseSchema, \
-    AppsResponseSchema, AppsFilterSchema, UploadAppFileResponseSchema
+    AppsResponseSchema, AppsFilterSchema, UploadAppFileResponseSchema, DeleteAppResponseSchema
 from models.app import AppStatus
-from services import app_service
+from services import app_service, storage_service
 from tasks.celery_tasks import async_upload_file_task
 
 app_bp = Blueprint('app', __name__, url_prefix='/app')
@@ -33,9 +33,12 @@ def create_app(payload):
 
 
 @app_bp.route('/<int:app_id>', methods=['DELETE'])
-@api_endpoint(url='/<int:app_id>', methods=['DELETE'], path_schema=AppIdPathSchema)
+@api_endpoint(url='/<int:app_id>', methods=['DELETE'], path_schema=AppIdPathSchema,
+              response_schema=DeleteAppResponseSchema)
 def delete_app(app_id):
-    return app_service.delete_app(app_id)
+    app_service.delete_app(app_id)
+    storage_service.delete_app_files(app_id)
+    return jsonify({"result": f"Application {app_id} deletion successful."})
 
 
 @app_bp.route('/<int:app_id>/upload', methods=['POST'])

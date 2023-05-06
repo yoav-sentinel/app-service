@@ -34,3 +34,7 @@ class AppsResponseSchema(Schema):
 class UploadAppFileResponseSchema(Schema):
     result = fields.String(required=True)
     task_id = fields.String(required=True)
+
+
+class DeleteAppResponseSchema(Schema):
+    result = fields.String(required=True)
