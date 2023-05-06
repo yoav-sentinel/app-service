@@ -6,7 +6,7 @@ from config import UPLOAD_FOLDER
 from models.app import Application
 from services import storage_service
 from tests.helpers import create_test_zip
-from tests.tests_base import BaseTestCase
+from tests.test_base import BaseTestCase
 
 
 class TestStorageService(BaseTestCase):
