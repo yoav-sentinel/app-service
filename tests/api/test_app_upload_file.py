@@ -27,6 +27,9 @@ class TestUploadFileAPI(BaseCeleryTestCase):
         response_data = json.loads(response.data)
         self.assertEqual(response_data['result'], 'File upload successful. Validation in progress.')
 
+        app = db_session.query(Application).first()
+        self.assertEqual(app.app_status, AppStatus.UNDER_REVIEW.value)
+
         # Wait for the Celery task to finish
         task_id = response_data['task_id']
         task_result = AsyncResult(task_id, app=self.celery)
@@ -35,7 +38,7 @@ class TestUploadFileAPI(BaseCeleryTestCase):
         self.assertFalse(os.path.exists(zip_path),
                          f"File {file_name} should not have been saved at {zip_path}")
 
-        app = db_session.query(Application).first()
+        db_session.refresh(app)
         self.assertEqual(app.app_status, AppStatus.REJECTED.value)
 
     def test_upload_valid_zip_sanity(self):

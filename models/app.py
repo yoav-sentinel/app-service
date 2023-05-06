@@ -1,4 +1,4 @@
-from enum import Enum as PythonEnum
+from enum import Enum
 
 from sqlalchemy import Column, Integer, String, UniqueConstraint
 
@@ -6,7 +6,7 @@ from database import db_session
 from models.base import BaseTable
 
 
-class AppStatus(PythonEnum):
+class AppStatus(Enum):
 
     def __new__(cls, value: str):
         obj = object.__new__(cls)
