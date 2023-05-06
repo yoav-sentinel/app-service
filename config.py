@@ -10,6 +10,9 @@ UPLOAD_FOLDER = os.path.join(ROOT_DIR, 'uploads')
 FILE_CONTENT_EXTENSION = '.doesntmakesense'
 ZIP_MIMETYPE = 'application/zip'
 
+# postgres
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://admin:admin@localhost:5432/apps')
+
 # celery
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
@@ -22,7 +25,6 @@ LOGS_FOLDER = os.path.join(ROOT_DIR, 'logs')
 
 # tests
 TEST_ZIP_NAME = 'test.zip'
-TEST_ZIP_PATH = os.path.join(UPLOAD_FOLDER, TEST_ZIP_NAME)
 
 
 class LogLevel(Enum):

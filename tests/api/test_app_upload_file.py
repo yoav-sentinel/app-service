@@ -1,26 +1,22 @@
 import io
 import os
-import unittest
 import zipfile
 
 from celery.result import AsyncResult
 from flask import json
 
-from celery_app import celery
-from config import TEST_ZIP_PATH
-from flask_app import flask_app
+from config import UPLOAD_FOLDER, TEST_ZIP_NAME
+from models.app import Application
 from tests.helpers import create_test_zip, remove_file, create_corrupted_zip
+from tests.tests_base import BaseCeleryTestCase
 
 
-class TestUploadFileAPI(unittest.TestCase):
-    def setUp(self):
-        self.app = flask_app
-        self.celery = celery
-        self.client = self.app.test_client()
+class TestUploadFileAPI(BaseCeleryTestCase):
+    def upload_and_validate_files_not_saved(self, app_id, file_name, file_content):
+        zip_path = os.path.join(UPLOAD_FOLDER, str(app_id), TEST_ZIP_NAME)
 
-    def upload_and_validate_files_not_saved(self, file_name, file_content):
         response = self.client.post(
-            '/app/upload?appId=123',
+            f'/app/{app_id}/upload',
             content_type='multipart/form-data',
             data={'file': (
                 io.BytesIO(file_content.encode() if isinstance(file_content, str) else file_content), file_name)},
@@ -34,10 +30,14 @@ class TestUploadFileAPI(unittest.TestCase):
         task_id = response_data['task_id']
         task_result = AsyncResult(task_id, app=self.celery)
         task_result.get(timeout=10)
-        self.assertFalse(os.path.exists(TEST_ZIP_PATH),
-                         f"File {file_name} should not have been saved at {TEST_ZIP_PATH}")
+
+        self.assertFalse(os.path.exists(zip_path),
+                         f"File {file_name} should not have been saved at {zip_path}")
 
     def test_upload_valid_zip_sanity(self):
+        app = Application.get_dummy_object().save()
+        uploaded_zip_path = os.path.join(UPLOAD_FOLDER, str(app.id), TEST_ZIP_NAME)
+
         expected_files = {
             'file1.doesntmakesense': 'text1',
             'file2.doesntmakesense': 'text2',
@@ -47,7 +47,7 @@ class TestUploadFileAPI(unittest.TestCase):
 
         with open(zip_path, 'rb') as f:
             response = self.client.post(
-                '/app/upload?appId=123',
+                f'/app/{app.id}/upload',
                 content_type='multipart/form-data',
                 data={'file': (io.BytesIO(f.read()), 'test.zip')},
             )
@@ -63,32 +63,42 @@ class TestUploadFileAPI(unittest.TestCase):
 
         # Check the content of the saved file
         for filename, expected_content in expected_files.items():
-            with zipfile.ZipFile(TEST_ZIP_PATH, 'r') as zf:
+            with zipfile.ZipFile(uploaded_zip_path, 'r') as zf:
                 with zf.open(filename, 'r') as f:
                     content = f.read().decode()
                     self.assertEqual(content, expected_content, f"Content of {filename} is incorrect")
 
-        remove_file(TEST_ZIP_PATH)
+        remove_file(zip_path)
 
-    def test_upload_without_appId(self):
+    def test_upload_without_app_id(self):
         response = self.client.post('/app/upload', content_type='multipart/form-data')
-        self.assertEqual(response.status_code, 400)
+        print(response.text)
+        self.assertEqual(response.status_code, 404)
+
+    def test_upload_app_not_exist(self):
+        app = Application.get_dummy_object().save()
+        response = self.client.post(f'/app/{app.id + 1}/upload', content_type='multipart/form-data')
+        self.assertEqual(response.status_code, 404)
 
     def test_upload_without_file(self):
-        response = self.client.post('/app/upload?appId=123', content_type='multipart/form-data')
+        app = Application.get_dummy_object().save()
+        response = self.client.post(f'/app/{app.id}/upload', content_type='multipart/form-data')
         self.assertEqual(response.status_code, 400)
 
     def test_upload_non_zip_extension(self):
-        self.upload_and_validate_files_not_saved("file.txt", "text file content")
+        app = Application.get_dummy_object().save()
+        self.upload_and_validate_files_not_saved(app.id, "file.txt", "text file content")
 
     def test_upload_multiple_extensions(self):
-        self.upload_and_validate_files_not_saved("file.zip.txt", "text file content")
+        app = Application.get_dummy_object().save()
+        self.upload_and_validate_files_not_saved(app.id, "file.zip.txt", "text file content")
 
     def test_upload_corrupted_zip(self):
+        app = Application.get_dummy_object().save()
         files_list = {
             'file1.doesntmakesense': 'text1',
             'file2.doesntmakesense': 'text2',
         }
         corrupted_zip_path, corrupted_zip_name = create_corrupted_zip(files_list)
         with open(corrupted_zip_path, 'rb') as f:
-            self.upload_and_validate_files_not_saved(corrupted_zip_name, f.read())
+            self.upload_and_validate_files_not_saved(app.id, corrupted_zip_name, f.read())
