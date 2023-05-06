@@ -1,10 +1,12 @@
-from multiprocessing import Process
+import multiprocessing
+import signal
+import sys
 
 from waitress import serve
 
 from database import Base, db_engine
 from flask_app import flask_app
-from worker import worker
+from workers import celery_worker
 
 
 def run_postgres():
@@ -16,18 +18,27 @@ def run_flask():
 
 
 def run_celery():
-    worker()
+    celery_worker()
 
 
 if __name__ == '__main__':
-    # Initialize the PostgreSQL database and create the tables if they don't exist
-    run_postgres()
+    # Start Celery worker in background
+    celery_proc = multiprocessing.Process(target=run_celery)
+    celery_proc.start()
 
-    flask_process = Process(target=run_flask)
-    celery_process = Process(target=run_celery)
+    # Start Flask server in foreground
+    flask_proc = multiprocessing.Process(target=run_flask)
+    flask_proc.start()
 
-    flask_process.start()
-    celery_process.start()
 
-    flask_process.join()
-    celery_process.join()
+    def signal_handler(sig, frame):
+        celery_proc.terminate()
+        flask_proc.terminate()
+        sys.exit(0)
+
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # Wait for Celery and Flask to finish
+    celery_proc.join()
+    flask_proc.join()
