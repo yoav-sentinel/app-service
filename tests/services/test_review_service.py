@@ -1,19 +1,20 @@
 import os
-import unittest
 from io import BytesIO
 
+from api.exceptions import ValidationError
 from services.review_service import validate_uploaded_file, INVALID_CONTENT_EXTENSIONS, INVALID_OR_CORRUPT_ZIP, \
     INVALID_FILE_TYPE
 from tests.helpers import create_test_zip, remove_file, create_corrupted_zip
+from tests.tests_base import BaseTestCase
 
 
-class BaseZipValidatorTest(unittest.TestCase):
+class BaseZipValidatorTest(BaseTestCase):
     def _assert_file_uploaded(self, file_path, file_content, file_name):
         self.assertIsNone(validate_uploaded_file(file_content, file_name))
         remove_file(file_path)
 
     def _assert_file_raised_error(self, file_path, file_content, file_name, error_message):
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(ValidationError) as cm:
             validate_uploaded_file(file_content, file_name)
         self.assertTrue(cm.exception.args[0] == error_message)
         remove_file(file_path)

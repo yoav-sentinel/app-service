@@ -2,6 +2,7 @@ import mimetypes
 import os
 import zipfile
 
+from api.exceptions import ValidationError
 from config import FILE_CONTENT_EXTENSION, ZIP_MIMETYPE
 
 INVALID_FILE_TYPE = "Invalid file type. Only zip files are allowed."
@@ -31,10 +32,10 @@ def _is_valid_mime_type(file_name):
 
 def validate_uploaded_file(file_obj, file_name):
     if not _is_valid_mime_type(file_name):
-        raise ValueError(INVALID_FILE_TYPE)
+        raise ValidationError(INVALID_FILE_TYPE)
 
     if not _is_valid_zip_file(file_obj):
-        raise ValueError(INVALID_OR_CORRUPT_ZIP)
+        raise ValidationError(INVALID_OR_CORRUPT_ZIP)
 
     if not _is_valid_zip_file_content(file_obj):
-        raise ValueError(INVALID_CONTENT_EXTENSIONS)
+        raise ValidationError(INVALID_CONTENT_EXTENSIONS)
