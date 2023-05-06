@@ -26,16 +26,16 @@ class TestGetAppById(TestApps):
         expected_app = Application.get_dummy_object()
         expected_app.save()
         for i in range(10):
-            Application.get_dummy_object().save()
+            Application.get_dummy_object(developer_id=i).save()
         app_response = app_service.get_app_by_id(expected_app.id)
         self.assertEqual(app_response, expected_app)
 
 
 class TestGetApps(TestApps):
     def test_get_apps_sanity(self):
-        Application.get_dummy_object().save()
-        Application.get_dummy_object().save()
-        Application.get_dummy_object().save()
+        Application.get_dummy_object(developer_id=123).save()
+        Application.get_dummy_object(developer_id=456).save()
+        Application.get_dummy_object(developer_id=789).save()
 
         apps_response = app_service.get_apps()
         self.assertEqual(len(apps_response), 3)

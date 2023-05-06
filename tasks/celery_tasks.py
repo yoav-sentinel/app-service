@@ -12,8 +12,6 @@ logger = logging.getLogger('celery')
 
 @celery.task()
 def async_upload_file_task(app_id, base64_file_content, file_name):
-    print(db_session)
-    print(db_session.query(Application).all())
     file_content = base64.b64decode(base64_file_content)
     file_obj = BytesIO(file_content)
 

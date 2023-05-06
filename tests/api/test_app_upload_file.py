@@ -6,7 +6,8 @@ from celery.result import AsyncResult
 from flask import json
 
 from config import UPLOAD_FOLDER, TEST_ZIP_NAME
-from models.app import Application
+from database import db_session
+from models.app import Application, AppStatus
 from tests.helpers import create_test_zip, remove_file, create_corrupted_zip
 from tests.tests_base import BaseCeleryTestCase
 
@@ -34,6 +35,9 @@ class TestUploadFileAPI(BaseCeleryTestCase):
         self.assertFalse(os.path.exists(zip_path),
                          f"File {file_name} should not have been saved at {zip_path}")
 
+        app = db_session.query(Application).first()
+        self.assertEqual(app.app_status, AppStatus.REJECTED.value)
+
     def test_upload_valid_zip_sanity(self):
         app = Application.get_dummy_object().save()
         uploaded_zip_path = os.path.join(UPLOAD_FOLDER, str(app.id), TEST_ZIP_NAME)
@@ -54,6 +58,10 @@ class TestUploadFileAPI(BaseCeleryTestCase):
 
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.data)
+
+        app = db_session.query(Application).first()
+        self.assertEqual(app.app_status, AppStatus.UNDER_REVIEW.value)
+
         self.assertEqual(response_data['result'], 'File upload successful. Validation in progress.')
 
         # Wait for the Celery task to finish
@@ -69,6 +77,9 @@ class TestUploadFileAPI(BaseCeleryTestCase):
                     self.assertEqual(content, expected_content, f"Content of {filename} is incorrect")
 
         remove_file(zip_path)
+
+        db_session.refresh(app)
+        self.assertEqual(app.app_status, AppStatus.APPROVED.value)
 
     def test_upload_without_app_id(self):
         response = self.client.post('/app/upload', content_type='multipart/form-data')

@@ -5,7 +5,6 @@ from utils import build_query_filter
 
 
 def get_app_by_id(app_id):
-    print(db_session)
     app = Application.get_by_id(app_id)
     if not app:
         raise NotFound(f"Application with ID {app_id} not found.")
