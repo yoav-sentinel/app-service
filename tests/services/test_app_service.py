@@ -2,7 +2,7 @@ import services.app_service as app_service
 from api.exceptions import ValidationError, NotFound
 from database import db_session
 from models.app import Application, AppStatus
-from tests.tests_base import BaseTestCase
+from tests.test_base import BaseTestCase
 
 
 class TestAppsService(BaseTestCase):

@@ -3,7 +3,7 @@ import os
 from config import UPLOAD_FOLDER
 from models.app import Application, AppStatus
 from tests.helpers import create_dummy_apps
-from tests.tests_base import BaseTestCase
+from tests.test_base import BaseTestCase
 
 
 class TestAppsAPI(BaseTestCase):
@@ -142,7 +142,6 @@ class TestGetApps(TestAppsAPI):
     def test_get_apps_filter_app_status_invalid_status(self):
         request_args = {"app_status": "dummy_status"}
         response = self._get_get_apps(request_args)
-        print(response.text)
         self.assertEqual(response.status_code, 400)
         self.assertIn("app_status", response.json["error"])
         self.assertIn("Must be one of", response.json["error"]["app_status"][0])

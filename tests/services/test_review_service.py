@@ -5,7 +5,7 @@ from api.exceptions import ValidationError
 from services.review_service import validate_uploaded_file, INVALID_CONTENT_EXTENSIONS, INVALID_OR_CORRUPT_ZIP, \
     INVALID_FILE_TYPE
 from tests.helpers import create_test_zip, remove_file, create_corrupted_zip
-from tests.tests_base import BaseTestCase
+from tests.test_base import BaseTestCase
 
 
 class BaseZipValidatorTest(BaseTestCase):

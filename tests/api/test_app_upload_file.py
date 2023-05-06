@@ -9,7 +9,7 @@ from config import UPLOAD_FOLDER, TEST_ZIP_NAME
 from database import db_session
 from models.app import Application, AppStatus
 from tests.helpers import create_test_zip, remove_file, create_corrupted_zip
-from tests.tests_base import BaseCeleryTestCase
+from tests.test_base import BaseCeleryTestCase
 
 
 class TestUploadFileAPI(BaseCeleryTestCase):
@@ -86,7 +86,6 @@ class TestUploadFileAPI(BaseCeleryTestCase):
 
     def test_upload_without_app_id(self):
         response = self.client.post('/app/upload', content_type='multipart/form-data')
-        print(response.text)
         self.assertEqual(response.status_code, 404)
 
     def test_upload_app_not_exist(self):

@@ -23,13 +23,13 @@ class BaseTestCase(unittest.TestCase):
         self.client = self.app.test_client()
 
         self._original_db_session = global_db_session.registry()
-        self.nested_transaction = self.test_db_session.begin_nested()
+        self.test_db_session.begin_nested()
         self.inner_session = sessionmaker(bind=self.test_db_session.connection())()
         self.use_test_db_session()
 
     def tearDown(self):
-        self.test_db_session.rollback()
         self.inner_session.close()
+        self.test_db_session.close()
         global_db_session.registry.set(self._original_db_session)
 
         shutil.rmtree(UPLOAD_FOLDER)
