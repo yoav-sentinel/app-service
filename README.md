@@ -6,7 +6,7 @@ app-service
 
 Flask app designed to help developers create and manage their applications. The app allows developers to upload files
 for their applications, with built-in validation to ensure that the uploaded files are valid zip archives containing
-only files with the `.doesntmakesense` extension. This streamlines the application creation process and ensures
+only `.zip` files with files with the `.doesntmakesense` extension. This streamlines the application creation process and ensures
 consistency and compliance with the specified file format requirements.
 
 ## Features
