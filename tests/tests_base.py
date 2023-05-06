@@ -43,6 +43,7 @@ class BaseCeleryTestCase(unittest.TestCase):
 
     def tearDown(self):
         global_db_session.query(Application).delete()
+        global_db_session.commit()
         shutil.rmtree(UPLOAD_FOLDER)
         os.mkdir(UPLOAD_FOLDER)
 
