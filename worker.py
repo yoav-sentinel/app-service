@@ -1,5 +1,5 @@
-from celery_app import celery
+from celery.__main__ import main as celery_main
 
 
 def worker():
-    celery.start(argv=['celery', 'worker', '--loglevel=info', '--concurrency=4'])
+    celery_main(['worker', '-A', 'celery_app', '--loglevel=info', '--concurrency=4'])

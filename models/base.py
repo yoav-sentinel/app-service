@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, DateTime, text, func
+from sqlalchemy import Column, DateTime, func, Integer
 
 from database import Base, db_session
 
@@ -6,7 +6,7 @@ from database import Base, db_session
 class BaseTable(Base):
     __abstract__ = True
 
-    id = Column(BigInteger, primary_key=True, index=True, server_default=text("id_generator()"))
+    id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime, nullable=False, default=func.now())
     updated_at = Column(DateTime, nullable=False, default=func.now(), onupdate=func.now())
 

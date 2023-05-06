@@ -33,13 +33,13 @@ def api_endpoint(url, methods, query_schema=None, payload_schema=None, path_sche
 
             if response_schema:
                 try:
-                    # Load the response schema class and validate the response
-                    response_data = response.get_json()
-                    response_schema().load(response_data)
+                    response_data = response_schema().dump(response)
                 except ValidationError as err:
                     return jsonify({"error": err.messages}), 500
+            else:
+                response_data = response
 
-            return response
+            return jsonify(response_data)
 
         wrapper.__name__ = f.__name__
         wrapper.url = url

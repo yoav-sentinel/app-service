@@ -3,6 +3,11 @@ import tempfile
 import zipfile
 
 from config import TEST_ZIP_NAME
+from models.app import Application
+
+
+def create_dummy_apps(num):
+    return [Application.get_dummy_object(developer_id=i, app_name=i).save() for i in range(num)]
 
 
 def create_test_zip(files):

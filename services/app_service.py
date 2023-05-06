@@ -5,16 +5,15 @@ from utils import build_query_filter
 
 
 def get_app_by_id(app_id):
-    print(db_session)
     app = Application.get_by_id(app_id)
     if not app:
         raise NotFound(f"Application with ID {app_id} not found.")
     return app
 
 
-def get_apps(**query_input):
+def get_apps(**request_args):
     query = db_session.query(Application)
-    return build_query_filter(query, query_input, Application).all()
+    return {"apps": build_query_filter(query, request_args, Application).all()}
 
 
 def create_app(developer_id, app_name):
@@ -34,7 +33,6 @@ def create_app(developer_id, app_name):
 def delete_app(app_id):
     app = get_app_by_id(app_id)
     db_session.delete(app)
-    return
 
 
 def update_app_status(app_id, app_status):

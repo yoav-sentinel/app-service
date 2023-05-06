@@ -21,15 +21,14 @@ class AppStatus(Enum):
 
     @classmethod
     def app_status_values(cls):
-        return [st.value for st in AppStatus]
+        return {st.value for st in AppStatus}
 
 
 class Application(BaseTable):
     __tablename__ = "applications"
-    #  TODO: change app_status to be ENUM
     developer_id = Column(Integer, nullable=False)
     app_name = Column(String, nullable=False)
-    app_status = Column(String, nullable=False)
+    app_status = Column(String, nullable=False)  # Not using Enum as it may surface complications on Enum modifications
 
     __table_args__ = (
         UniqueConstraint('developer_id', 'app_name', name='_developer_id_app_name_uc'),
@@ -46,7 +45,6 @@ class Application(BaseTable):
     def get_by_id(cls, app_id, session=None):
         if not session:
             session = db_session
-        print(db_session)
         return session.query(cls).filter(cls.id == app_id).one_or_none()
 
     @classmethod

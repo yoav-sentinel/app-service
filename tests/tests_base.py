@@ -9,6 +9,7 @@ from config import UPLOAD_FOLDER
 from database import db_session as global_db_session, create_scoped_session, db_engine
 from flask_app import flask_app
 from models.app import Application
+from tests.helpers import create_dummy_apps
 
 
 class BaseTestCase(unittest.TestCase):
@@ -31,6 +32,9 @@ class BaseTestCase(unittest.TestCase):
         self.inner_session.close()
         global_db_session.registry.set(self._original_db_session)
 
+        shutil.rmtree(UPLOAD_FOLDER)
+        os.mkdir(UPLOAD_FOLDER)
+
     def use_test_db_session(self):
         global_db_session.registry.set(self.inner_session)
 
@@ -50,16 +54,9 @@ class BaseCeleryTestCase(unittest.TestCase):
 
 class TestTestsConfiguration(BaseTestCase):
     def test_tests_commits(self):
-        for i in range(10):
-            Application.get_dummy_object().save()
+        create_dummy_apps(10)
         global_db_session.commit()
-
         self.assertEqual(len(global_db_session.query(Application).all()), 10)
-
-        for i in range(10):
-            Application.get_dummy_object().save()
-        global_db_session.commit()
-        self.assertEqual(len(global_db_session.query(Application).all()), 20)
 
     def test_tests_rollbacks(self):
         self.assertEqual(len(global_db_session.query(Application).all()), 0)

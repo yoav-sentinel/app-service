@@ -5,11 +5,11 @@ from models.app import Application, AppStatus
 from tests.tests_base import BaseTestCase
 
 
-class TestApps(BaseTestCase):
+class TestAppsService(BaseTestCase):
     pass
 
 
-class TestGetAppById(TestApps):
+class TestGetAppById(TestAppsService):
     def test_get_app_by_id_sanity(self):
         app = Application.get_dummy_object()
         app.save()
@@ -26,26 +26,26 @@ class TestGetAppById(TestApps):
         expected_app = Application.get_dummy_object()
         expected_app.save()
         for i in range(10):
-            Application.get_dummy_object().save()
+            Application.get_dummy_object(developer_id=i).save()
         app_response = app_service.get_app_by_id(expected_app.id)
         self.assertEqual(app_response, expected_app)
 
 
-class TestGetApps(TestApps):
+class TestGetApps(TestAppsService):
     def test_get_apps_sanity(self):
-        Application.get_dummy_object().save()
-        Application.get_dummy_object().save()
-        Application.get_dummy_object().save()
+        Application.get_dummy_object(developer_id=123).save()
+        Application.get_dummy_object(developer_id=456).save()
+        Application.get_dummy_object(developer_id=789).save()
 
         apps_response = app_service.get_apps()
-        self.assertEqual(len(apps_response), 3)
+        self.assertEqual(len(apps_response["apps"]), 3)
 
     def test_get_apps_filters_developer_id(self):
         app_1 = Application.get_dummy_object(developer_id=123, app_name='abc').save()
         app_2 = Application.get_dummy_object(developer_id=123, app_name='def').save()
         Application.get_dummy_object(developer_id=456).save()
 
-        apps_response = app_service.get_apps(developer_id=123)
+        apps_response = app_service.get_apps(developer_id=123)["apps"]
         self.assertEqual(len(apps_response), 2)
         self.assertTrue(app_1 in apps_response)
         self.assertTrue(app_2 in apps_response)
@@ -55,7 +55,7 @@ class TestGetApps(TestApps):
         app_2 = Application.get_dummy_object(developer_id=456, app_name='abc').save()
         Application.get_dummy_object(developer_id=123, app_name='def').save()
 
-        apps_response = app_service.get_apps(app_name='abc')
+        apps_response = app_service.get_apps(app_name='abc')["apps"]
         self.assertEqual(len(apps_response), 2)
         self.assertTrue(app_1 in apps_response)
         self.assertTrue(app_2 in apps_response)
@@ -68,12 +68,12 @@ class TestGetApps(TestApps):
         app_3 = Application.get_dummy_object(developer_id=789, app_name='ghi',
                                              app_status=AppStatus.DELETED.value).save()
 
-        apps_response = app_service.get_apps(app_status=AppStatus.APPROVED.value)
+        apps_response = app_service.get_apps(app_status=AppStatus.APPROVED.value)["apps"]
         self.assertEqual(len(apps_response), 2)
         self.assertTrue(app_1 in apps_response)
         self.assertTrue(app_2 in apps_response)
 
-        apps_response = app_service.get_apps(app_status=AppStatus.DELETED.value)
+        apps_response = app_service.get_apps(app_status=AppStatus.DELETED.value)["apps"]
         self.assertEqual(len(apps_response), 1)
         self.assertTrue(app_3 in apps_response)
 
@@ -83,20 +83,20 @@ class TestGetApps(TestApps):
         app_2 = Application.get_dummy_object(developer_id=456, app_name='def',
                                              app_status=AppStatus.APPROVED.value).save()
 
-        apps_response = app_service.get_apps(app_status=AppStatus.APPROVED.value)
+        apps_response = app_service.get_apps(app_status=AppStatus.APPROVED.value)["apps"]
         self.assertEqual(len(apps_response), 2)
         self.assertTrue(app_1 in apps_response)
         self.assertTrue(app_2 in apps_response)
 
-        apps_response = app_service.get_apps(app_status=AppStatus.APPROVED.value, developer_id=123)
+        apps_response = app_service.get_apps(app_status=AppStatus.APPROVED.value, developer_id=123)["apps"]
         self.assertEqual(len(apps_response), 1)
         self.assertTrue(app_1 in apps_response)
 
-        apps_response = app_service.get_apps(app_status=AppStatus.APPROVED.value, app_name="dummy_name")
+        apps_response = app_service.get_apps(app_status=AppStatus.APPROVED.value, app_name="dummy_name")["apps"]
         self.assertEqual(len(apps_response), 0)
 
 
-class TestCreateApps(TestApps):
+class TestCreateApps(TestAppsService):
     def test_create_app_sanity(self):
         app = app_service.create_app(developer_id=123, app_name='abc')
         result = db_session.query(Application).first()
@@ -109,7 +109,7 @@ class TestCreateApps(TestApps):
             app_service.create_app(developer_id=123, app_name='abc')
 
 
-class TestDeleteApps(TestApps):
+class TestDeleteApps(TestAppsService):
     def test_delete_app_sanity(self):
         app = Application.get_dummy_object().save()
         self.assertEqual(len(db_session.query(Application).all()), 1)
@@ -121,5 +121,3 @@ class TestDeleteApps(TestApps):
     def test_delete_app_not_found(self):
         with self.assertRaises(NotFound):
             app_service.delete_app(123)
-
-    # TODO: add test for app files deletion
