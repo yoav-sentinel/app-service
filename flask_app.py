@@ -43,7 +43,7 @@ def session_commit(response):
         db_session.commit()
     except SQLAlchemyError as e:
         db_session.rollback()
-        logger.exception("Unexpected problem on commit: {}".format(e))
+        flask_app.logger.exception("Unexpected problem on commit: {}".format(e))
         response.status_code = http.HTTPStatus.BAD_REQUEST
         response.headers["Content-Type"] = "text/json"
         response.data = {
