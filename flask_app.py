@@ -1,14 +1,14 @@
 import http
+import logging
+from logging.handlers import RotatingFileHandler
 
 from flask import Flask, jsonify
 from sqlalchemy.exc import SQLAlchemyError
 
 from api.endpoints.app import app_bp
 from api.exceptions import ERROR_STATUS_CODES
-from config import UPLOAD_FOLDER, MAX_CONTENT_LENGTH, configure_logging
+from config import UPLOAD_FOLDER, MAX_CONTENT_LENGTH, FLASK_LOGS
 from database import db_session
-
-logger = configure_logging('flask_app')
 
 
 def create_flask_app():
@@ -22,6 +22,11 @@ def create_flask_app():
 
 
 flask_app = create_flask_app()
+
+# Set up logging
+handler = RotatingFileHandler(FLASK_LOGS, maxBytes=10000, backupCount=1)
+handler.setLevel(logging.INFO)
+flask_app.logger.addHandler(handler)
 
 
 @flask_app.before_request
@@ -55,6 +60,8 @@ def session_commit(response):
 
 @flask_app.teardown_appcontext
 def shutdown_session(exception=None):
+    if exception:
+        db_session.rollback()
     db_session.remove()
 
 
