@@ -26,7 +26,6 @@ class AppStatus(Enum):
 
 class Application(BaseTable):
     __tablename__ = "applications"
-    #  TODO: change app_status to be ENUM
     developer_id = Column(Integer, nullable=False)
     app_name = Column(String, nullable=False)
     app_status = Column(String, nullable=False)  # Not using Enum as it may surface complications on Enum modifications

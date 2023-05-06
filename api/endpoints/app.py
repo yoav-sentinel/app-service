@@ -1,6 +1,6 @@
 import base64
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from werkzeug.utils import secure_filename
 
 from api.decorators import api_endpoint
@@ -20,16 +20,16 @@ def get_app_by_id(app_id):
     return app_service.get_app_by_id(app_id)
 
 
-@app_bp.route('/', methods=['GET'])
-@api_endpoint(url='/', methods=['GET'], query_schema=AppsFilterSchema, response_schema=AppsResponseSchema)
-def get_apps(query_input):
-    return app_service.get_apps(**query_input)
+@app_bp.route('', methods=['GET'])
+@api_endpoint(url='', methods=['GET'], query_schema=AppsFilterSchema, response_schema=AppsResponseSchema)
+def get_apps():
+    return app_service.get_apps(**request.args)
 
 
-@app_bp.route('/', methods=['POST'])
-@api_endpoint(url='/', methods=['POST'], payload_schema=PostAppSchema, response_schema=AppsResponseSchema)
-def create_app(payload):
-    return app_service.create_app(**payload)
+@app_bp.route('', methods=['POST'])
+@api_endpoint(url='', methods=['POST'], payload_schema=PostAppSchema, response_schema=AppResponseSchema)
+def create_app():
+    return app_service.create_app(**request.get_json())
 
 
 @app_bp.route('/<int:app_id>', methods=['DELETE'])
@@ -38,7 +38,7 @@ def create_app(payload):
 def delete_app(app_id):
     app_service.delete_app(app_id)
     storage_service.delete_app_files(app_id)
-    return jsonify({"result": f"Application {app_id} deletion successful."})
+    return {"result": f"Application {app_id} deletion successful."}
 
 
 @app_bp.route('/<int:app_id>/upload', methods=['POST'])
@@ -58,6 +58,6 @@ def upload_file(app_id):
     base64_file_content = base64.b64encode(file_content).decode()
     task = async_upload_file_task.apply_async(args=[app_id, base64_file_content, filename])
 
-    return jsonify({
+    return {
         "result": "File upload successful. Validation in progress.",
-        "task_id": task.id})
+        "task_id": task.id}

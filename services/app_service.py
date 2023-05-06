@@ -11,9 +11,9 @@ def get_app_by_id(app_id):
     return app
 
 
-def get_apps(**query_input):
+def get_apps(**request_args):
     query = db_session.query(Application)
-    return build_query_filter(query, query_input, Application).all()
+    return {"apps": build_query_filter(query, request_args, Application).all()}
 
 
 def create_app(developer_id, app_name):
