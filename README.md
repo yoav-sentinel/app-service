@@ -113,3 +113,78 @@ To run all tests:
 ```
 python run_test.py
 ```
+
+## API Examples
+Assuming flask is running with default port 5000 on localhost
+### Create Application
+```POST http://localhost:5000/app```
+#### Payload
+```{"developer_id": 123456, "app_name": "my app"}```
+#### Response
+```
+{
+    "app_id": 4217,
+    "app_name": "my app",
+    "app_status": "not_uploaded",
+    "created_at": "2023-05-08T12:29:14.977879",
+    "developer_id": 123456,
+    "updated_at": "2023-05-08T12:29:14.977879"
+}
+```
+
+### Get Application by ID
+```GET http://localhost:5000/4217```
+#### Response
+```
+{
+    "app_id": 4217,
+    "app_name": "my app",
+    "app_status": "not_uploaded",
+    "created_at": "2023-05-08T12:29:14.977879",
+    "developer_id": 123456,
+    "updated_at": "2023-05-08T12:29:14.977879"
+}
+```
+
+### Get Applications
+```GET http://localhost:5000/app?app_status=not_uploaded&developer_id=123456```
+#### Response
+```
+{
+    "apps": [
+        {
+            "app_id": 4217,
+            "app_name": "my app",
+            "app_status": "not_uploaded",
+            "created_at": "2023-05-08T12:29:14.977879",
+            "developer_id": 123456,
+            "updated_at": "2023-05-08T12:29:14.977879"
+        }
+    ]
+}
+```
+
+### Upload File
+```POST http://localhost:5000/app/4217/upload```
+#### Request Body
+```
+Content-Disposition: form-data; name="file"; filename="example.zip"
+Content-Type: application/zip
+```
+#### Response
+```
+{
+    "result": "File upload successful. Validation in progress.",
+    "task_id": "7f344aa5-49ee-430f-9d41-7cd3d86d7dd5"
+}
+```
+
+### Delete Application
+```DELETE http://localhost:5000/app/4217```
+
+#### Response
+```
+{
+    "result": "Application 4217 deletion successful."
+}
+```
