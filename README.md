@@ -133,7 +133,7 @@ Assuming flask is running with default port 5000 on localhost
 ```
 
 ### Get Application by ID
-```GET http://localhost:5000/4217```
+```GET http://localhost:5000/app/4217```
 #### Response
 ```
 {
